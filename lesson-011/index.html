@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Cesium002</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="../Build/Cesium/Widgets/widgets.css">
+    <script type="text/javascript" src="../Build/Cesium/Cesium.js"></script>
+    <style>
+        div,
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        .cesium-widget-credits {
+            display: none !important;
+        }
+    </style>
+
+<body>
+    <div id="cesiumcontainer" style="width:100%;height:100%"></div>
+
+    <script type="module">
+        import { BaiduImageryProvider } from "./BaiduImageryProvider.js"
+        // 服务负载子域
+        var subdomains = ['0', '1', '2', '3', '4', '5', '6', '7'];
+        var viewer = new Cesium.Viewer("cesiumcontainer", {
+            //搜索框
+            geocoder: false,
+            //home键
+            homeButton: false,
+            // 动画控件
+            animation: false,
+            //全屏按钮
+            fullscreenButton: false,
+            //场景模式选择器
+            sceneModePicker: false,
+            //时间轴
+            timeline: false,
+            //导航提示
+            navigationHelpButton: false,
+            //地图选择器
+            baseLayerPicker: false,
+            imageryProvider: new BaiduImageryProvider({
+                url: "http://api0.map.bdimg.com/customimage/tile?&x={x}&y={y}&z={z}&scale=1&customid=darkgreen"
+            })
+
+        })
+
+
+
+    </script>
+</body>
+
+</html>

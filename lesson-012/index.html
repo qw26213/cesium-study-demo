@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Cesium002</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="../Build/Cesium/Widgets/widgets.css">
+    <script type="text/javascript" src="../Build/Cesium/Cesium.js"></script>
+    <style>
+        div,
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        .cesium-widget-credits {
+            display: none !important;
+        }
+    </style>
+
+<body>
+    <div id="cesiumcontainer" style="width:100%;height:100%"></div>
+
+    <script type="module">
+        import { BaiduImageryProvider } from "./BaiduImageryProvider.js"
+        // 服务负载子域
+        var subdomains = ['0', '1', '2', '3', '4', '5', '6', '7'];
+        var viewer = new Cesium.Viewer("cesiumcontainer", {
+            //搜索框
+            geocoder: false,
+            //home键
+            homeButton: false,
+            // 动画控件
+            animation: false,
+            //全屏按钮
+            fullscreenButton: false,
+            //场景模式选择器
+            sceneModePicker: false,
+            //时间轴
+            timeline: false,
+            //导航提示
+            navigationHelpButton: false,
+            //地图选择器
+            baseLayerPicker: false,
+            imageryProvider: new BaiduImageryProvider({
+                url: "http://api0.map.bdimg.com/customimage/tile?&x={x}&y={y}&z={z}&scale=1&customid=darkgreen"
+            })
+
+        })
+
+        var promise = Cesium.GeoJsonDataSource.load('./data/hbeiprovince.json');
+        promise.then(datasource=>{
+            
+            viewer.dataSources.add(datasource);
+          
+            datasource.entities.values.forEach(enetity=>{
+                console.log(enetity);
+                enetity.polygon.outlineColor=Cesium.Color.RED;
+                enetity.polygon.material=Cesium.Color.BLUE;
+                enetity.polygon.height=1000;
+                enetity.polygon.extrudedHeight=2000;
+               
+            })
+            viewer.zoomTo(datasource)
+        })
+
+
+        
+       // 申明一个XMLHttpRequest
+       var request = new XMLHttpRequest();
+        // 设置请求方法与路径
+        request.open("get", './data/hbeiprovince.json');
+        // 不发送数据到服务器
+        request.send(null);
+        //XHR对象获取到返回信息后执行
+        request.onload = function () {
+            // 解析获取到的数据
+            var data = JSON.parse(request.responseText);
+           
+            data.features.forEach(feature=>{
+               
+                feature.geometry.coordinates.forEach(coordinate=>{
+                    console.log(coordinate);
+                   viewer.entities.add({
+                    name:"hbei",
+                   polygon:{
+                    hierarchy:{
+                        positions:Cesium.Cartesian3.fromDegreesArray(coordinate.flat())
+                    },
+                    height:10000,
+                    extrudedHeight:20000,
+                    material:Cesium.Color.RED,
+                    outline:true,
+                    outlineColor:Cesium.Color.ORANGE
+            //             hierarchy:Cesium.Cartesian3.fromDegreesArray(coordinate.flat()),
+            //             material:Cesium.Color.YELLOW,
+            //             height:10000,
+            //             extrudedHeight:20000
+                   }
+                })
+             })
+ 
+             })
+
+        }
+
+    </script>
+</body>
+
+</html>

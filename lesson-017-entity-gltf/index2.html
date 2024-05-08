@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Cesium006-entity</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="../Build/Cesium/Widgets/widgets.css">
+    <script type="text/javascript" src="../Build/Cesium/Cesium.js"></script>
+    <style>
+        div,
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        .cesium-widget-credits {
+            display: none !important;
+        }
+    </style>
+
+<body>
+    <div id="cesiumcontainer" style="width:100%;height:100%"></div>
+
+    <script type="text/javascript">
+        var viewer = new Cesium.Viewer("cesiumcontainer", {
+            //搜索框
+            geocoder: false,
+            //home键
+            homeButton: false,
+            // 动画控件
+            animation: false,
+            //全屏按钮
+            fullscreenButton: false,
+            //场景模式选择器
+            sceneModePicker: false,
+            //时间轴
+            timeline: false,
+            //导航提示
+            navigationHelpButton: false,
+            //地图选择器
+            baseLayerPicker: false,
+            //动态动画
+            shouldAnimate: true,
+            imageryProvider: new Cesium.UrlTemplateImageryProvider({
+                url: "https://t5.tianditu.gov.cn/DataServer?T=img_w&tk=f398daef89049d918105f6d4d412916a&x={x}&y={y}&l={z}",
+                minimumLevel: 1,
+                maximumLevel: 18
+            }),
+        })
+        //开启阴影
+        viewer.shadows = false,
+        viewer.scene.globe.enableLighting = false
+        //显示帧率
+        viewer.scene.debugShowFramesPerSecond = false
+        //  console.log(Cesium.Cartographic);
+        var czml = [
+            {
+                id: "document",
+                name: "CZML Path",
+                version: "1.0",
+                clock: {
+                    interval: "2020-09-30T10:00:00Z/2020-09-30T10:01:20Z",
+                    currentTime: "2012-08-04T10:00:00Z",
+                    multiplier: 10,
+                },
+            },
+            {
+                id: "path",
+                name: "path with GPS flight data",
+                description: "Created by wangyu",
+                availability: "2020-09-30T10:00:00Z/2020-09-30T10:01:20Z",
+                path: {
+                    material: {
+                        polylineOutline: {
+                            color: {
+                                rgba: [255, 0, 255, 127],
+                            },
+                            outlineColor: {
+                                rgba: [255, 0, 255, 127],
+                            },
+                            outlineWidth: 3,
+                        },
+                    },
+                    width: 5,
+                    leadTime: 10,
+                    trailTime: 1000,
+                    resolution: 5,
+                },
+                model: {
+                    gltf: "data/Cesium_Air.glb",
+                    scale: 2.0,
+                    minimumPixelSize: 128,
+                },
+                position: {
+                    epoch: "2020-09-30T10:00:00Z",
+                    cartographicDegrees: [
+                        0, 102.23404378554466, 27.825736605050523, 2500,
+                        10, 102.23691954070244, 27.82887625908256, 2500,
+                        20, 102.23908610745147, 27.830920963237897, 2500,
+                        30, 102.24222708893987, 27.834251845778994, 2500,
+                        40, 102.24483684219396, 27.837156939755058, 2500,
+                        50, 102.24821756517042, 27.838973119832243, 2500,
+                        60, 102.2497304631213, 27.843805668815058, 2500,
+                        70, 102.25017946873977, 27.849726810753346, 2500,
+                        80, 102.24597936406548, 27.852179959795592, 2500
+                    ],
+                },
+            },
+        ];
+
+        var airModel;
+        viewer.dataSources.add(Cesium.CzmlDataSource.load(czml)).then(function (ds) {
+            airModel = ds.entities.getById("path");
+            // 设置模型可以随路径方向转向
+            airModel.orientation = new Cesium.VelocityOrientationProperty(airModel.position);
+            airModel.model.alignedAxis = new Cesium.VelocityVectorProperty(airModel.position, true)
+        });
+    </script>

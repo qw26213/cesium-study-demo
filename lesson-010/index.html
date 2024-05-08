@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Cesium002</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="../Build/Cesium/Widgets/widgets.css">
+    <script type="text/javascript" src="../Build/Cesium/Cesium.js"></script>
+    <style>
+        div,
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        .cesium-widget-credits {
+            display: none !important;
+        }
+    </style>
+
+<body>
+    <div id="cesiumcontainer" style="width:100%;height:100%"></div>
+
+    <script type="text/javascript">
+
+        // 服务负载子域
+        var subdomains = ['0', '1', '2', '3', '4', '5', '6', '7'];
+        var viewer = new Cesium.Viewer("cesiumcontainer", {
+            //搜索框
+            geocoder: false,
+            //home键
+            homeButton: false,
+            // 动画控件
+            animation: false,
+            //全屏按钮
+            fullscreenButton: false,
+            //场景模式选择器
+            sceneModePicker: false,
+            //时间轴
+            timeline: false,
+            //导航提示
+            navigationHelpButton: false,
+            //地图选择器
+            baseLayerPicker: false,
+            imageryProvider: new Cesium.WebMapTileServiceImageryProvider({
+                url: "http://t{s}.tianditu.gov.cn/vec_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=vec&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=b679e53c0eca7f1f302d4336b6e21b2c",
+                subdomains: subdomains,
+                layer: "tdtImgLayer",
+                style: "default",
+                format: "image/jpeg",
+                tileMatrixSetID: "GoogleMapsCompatible",//使用谷歌的瓦片切片方式
+            })
+
+        })
+       
+   viewer.imageryLayers.addImageryProvider(new Cesium.WebMapTileServiceImageryProvider({   //调用影响中文注记服务
+    url: "http://t{s}.tianditu.com/cva_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cva&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=b679e53c0eca7f1f302d4336b6e21b2c",
+    subdomains:subdomains,
+    layer: "tdtAnnoLayer",
+    style: "default",
+    format: "image/jpeg",
+    tileMatrixSetID: "GoogleMapsCompatible",
+}));
+
+
+    </script>
+</body>
+
+</html>

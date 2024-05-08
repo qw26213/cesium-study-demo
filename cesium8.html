@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="Build/CesiumUnminified/Cesium.js"></script>
+    <link rel="stylesheet" href="Build/Cesium/Widgets/widgets.css">
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      #cesiumContainer {
+        width: 100%;
+        height: 100%;
+      }
+      .pop_up {
+        background: rgba(42, 42, 42, 0.8);
+        color: white;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="cesiumContainer"></div>
+    <table id="entityAttr" class="pop_up"></table>
+    <script>
+      let entityAttrEl = document.getElementById("entityAttr");
+      var imageryProvider = new Cesium.UrlTemplateImageryProvider({ url: 'http://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}' });
+      let viewer = new Cesium.Viewer("cesiumContainer", {
+        selectionIndicator: false,
+        infoBox: false,
+        shouldAnimate: true,
+        imageryProvider,
+      });
+      let entity = viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(120, 31),
+        point: {
+          pixelSize: 5,
+          color: Cesium.Color.RED,
+          outlineColor: Cesium.Color.WHITE,
+          outlineWidth: 2,
+        },
+        label: {
+          text: "Citizens Bank Park",
+          font: "14pt monospace",
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          outlineWidth: 2,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          pixelOffset: new Cesium.Cartesian2(0, -9),
+        },
+        ellipsoid: {
+          //可以指定三个轴的半径
+          radii: new Cesium.Cartesian3(200, 200, 200),
+          material: Cesium.Color.BLUE,
+        },
+      });
+      var ellipsoid01 = viewer.entities.add({
+        name: "Blue ellipsoid",
+        position: Cesium.Cartesian3.fromDegrees(120, 31, 3000.0),
+        ellipsoid: {
+          //可以指定三个轴的半径
+          radii: new Cesium.Cartesian3(200, 500, 200),
+          material: Cesium.Color.RED,
+        },
+      });
+
+      // 添加辅助线
+      let line_height, line_lat, line_lng;
+      let modelEntity = viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(120, 31.5),
+        model: {
+          uri: "../model/shengli/ww3.gltf",
+        },
+      });
+      viewer.zoomTo(entity);
+      adjustEntity();
+      function adjustEntity() {
+        let moveFlag = false; // 是否移动 entity
+        let entitySelected = null; // 单击选中的 entity
+        let position = { x: 0, y: 0, z: 0 };
+        const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+        // 鼠标左键按下,拾取 entity
+        handler.setInputAction(function (e) {
+          // 拾取坐标
+          var pick = viewer.scene.pick(e.position);
+          if (pick && pick.id) {
+            moveFlag = true;
+            if (!line_height) {
+              addAssistLine()
+            }
+            // 禁止相机移动
+            viewer.scene.screenSpaceCameraController.enableInputs = false;
+            if (entitySelected && entitySelected == pick.id) {
+              return;
+            }
+            if (entitySelected && entitySelected != pick.id) {
+              setPosition();
+            }
+
+            // 获取实体 entity
+            entitySelected = pick.id;
+            // 获取实体坐标并赋值给 position
+            let p = worldToLng(viewer, entitySelected.position._value);
+            position.x = p.x;
+            position.y = p.y;
+            position.z = p.z;
+            // position 添加 callbackProperty
+            entitySelected.position = new Cesium.CallbackProperty(function () {
+              return Cesium.Cartesian3.fromDegrees(
+                position.x,
+                position.y,
+                position.z
+              );
+            }, false);
+          } else {
+            setPosition();
+            entitySelected = undefined;
+            moveFlag = false;
+            viewer.scene.screenSpaceCameraController.enableInputs = true;
+          }
+        }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+        // 左键抬起, 完成移动
+        handler.setInputAction(function (e) {
+          moveFlag = false;
+          viewer.scene.screenSpaceCameraController.enableInputs = true;
+        }, Cesium.ScreenSpaceEventType.LEFT_UP);
+        // 右击事件, 完成高度设置
+        handler.setInputAction(function (e) {
+          if (moveFlag) return;
+          console.log(position);
+          setPosition();
+          entitySelected = undefined;
+          // 移除辅助线
+          viewer.entities.remove(line_height)
+          viewer.entities.remove(line_lng)
+          viewer.entities.remove(line_lat)
+          line_height=undefined
+          line_lng=undefined
+          line_lat=undefined
+        }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+        handler.setInputAction(function (e) {
+          if (entitySelected && moveFlag) {
+            let p = mousePointToLngLat(viewer, e.endPosition);
+            position.x = p.lng;
+            position.y = p.lat;
+          }
+        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+        window.addEventListener("keydown", (e) => {
+          if (!entitySelected) return;
+          switch (e.keyCode) {
+            case 87:
+              position.z += 1;
+              break;
+            case 83:
+              position.z -= 1;
+          }
+        });
+
+        function setPosition() {
+          if (!entitySelected) return;
+          console.log(position);
+          entitySelected.position = Cesium.Cartesian3.fromDegrees(
+            position.x,
+            position.y,
+            position.z
+          );
+        }
+        // 世界坐标转经纬度
+        function worldToLng(viewer, position) {
+          var ellipsoid = viewer.scene.globe.ellipsoid;
+          var cartographic = ellipsoid.cartesianToCartographic(position);
+          if (cartographic == null) return null;
+          var lat = Cesium.Math.toDegrees(cartographic.latitude);
+          var lng = Cesium.Math.toDegrees(cartographic.longitude);
+          var height = cartographic.height;
+          var result = new Cesium.Cartesian3(lng, lat, height);
+          return result;
+        }
+
+        // 屏幕坐标转经纬度
+        function mousePointToLngLat(viewer, mousePoint) {
+          var ellipsoid = viewer.scene.globe.ellipsoid;
+          var pick1 = new Cesium.Cartesian2(mousePoint.x, mousePoint.y);
+          var cameraRay = viewer.camera.getPickRay(pick1);
+          var cartesian = viewer.scene.globe.pick(cameraRay, viewer.scene);
+          if (!cartesian) {
+            return;
+          }
+          var cartographic = ellipsoid.cartesianToCartographic(cartesian);
+          var lat = Cesium.Math.toDegrees(cartographic.latitude);
+          var lng = Cesium.Math.toDegrees(cartographic.longitude);
+          return { lng: lng, lat: lat };
+        }
+
+        function addAssistLine() {
+          line_height = viewer.entities.add({
+            id: "line_height",
+            polyline: {
+              positions: new Cesium.CallbackProperty(function () {
+                return Cesium.Cartesian3.fromDegreesArrayHeights([
+                  position.x,
+                  position.y,
+                  position.z - 1000,
+                  position.x,
+                  position.y,
+                  position.z + 1000,
+                ]);
+              }, false),
+              width: 10,
+              material: new Cesium.PolylineArrowMaterialProperty(
+                Cesium.Color.RED
+              ),
+            },
+          });
+          line_lng = viewer.entities.add({
+            id: "line_lng",
+            polyline: {
+              positions: new Cesium.CallbackProperty(function () {
+                return Cesium.Cartesian3.fromDegreesArrayHeights([
+                  position.x - 0.01,
+                  position.y,
+                  position.z,
+                  position.x + 0.01,
+                  position.y,
+                  position.z,
+                ]);
+              }, false),
+              width: 10,
+              material: new Cesium.PolylineArrowMaterialProperty(
+                Cesium.Color.YELLOW
+              ),
+            },
+          });
+          line_lat = viewer.entities.add({
+            id: "line_lat",
+            polyline: {
+              positions: new Cesium.CallbackProperty(function () {
+                return Cesium.Cartesian3.fromDegreesArrayHeights([
+                  position.x,
+                  position.y - 0.01,
+                  position.z,
+                  position.x,
+                  position.y + 0.01,
+                  position.z,
+                ]);
+              }, false),
+              width: 10,
+              material: new Cesium.PolylineArrowMaterialProperty(
+                Cesium.Color.BLUE
+              ),
+            },
+          });
+        }
+      }
+    </script>
+  </body>
+</html>

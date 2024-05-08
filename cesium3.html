@@ -1,0 +1,73 @@
+<script>
+// 假设已有一个Viewer实例和Billboard实例
+var viewer = new Cesium.Viewer('cesiumContainer');
+var billboard = viewer.entities.add({
+    billboard: {
+        image: 'path/to/image.png',
+        // 其他Billboard选项...
+    },
+    position: Cesium.Cartesian3.fromDegrees(-75.59777, 40.03883) // 初始位置
+});
+ 
+// 更新Billboard的位置
+function updateBillboardPosition(longitude, latitude) {
+    var newPosition = Cesium.Cartesian3.fromDegrees(longitude, latitude);
+    billboard.position = newPosition;
+}
+ 
+// 调用函数更新位置
+updateBillboardPosition(-122.41753, 37.77298); // 举例更新到纽约的位置
+</script>
+
+<script>
+// 假设已经有一个Cesium.Viewer实例叫做viewer
+ 
+// 创建一个广告牌实体
+var billboard = viewer.entities.add({
+    position: Cesium.Cartesian3.fromDegrees(-75.59777, 40.03883),
+    billboard: {
+        image: 'path/to/your/image.png',
+        scale: 2.0
+    }
+});
+ 
+// 定义实时动画的函数
+function updateBillboardPosition(time) {
+    // 更新广告牌位置的逻辑，例如让它沿一个圆周运动
+    var radius = 1000.0; // 半径，单位为米
+    var angle = time / 10000; // 用时间作为角度
+    var position = Cesium.Cartesian3.fromRadians(angle, radius);
+    
+    // 更新广告牌的位置
+    billboard.position = position;
+    
+    // 继续请求下一个时间更新
+    Cesium.RequestAnimationFrame.requestAnimationFrame(updateBillboardPosition);
+}
+ 
+// 开始实时动画
+Cesium.RequestAnimationFrame.requestAnimationFrame(updateBillboardPosition);
+</script>
+
+<script>
+    // 创建BillboardGraphics对象
+var billboard = viewer.entities.add({
+  billboard: {
+    image: 'path/to/image.png',
+    show: true,
+    scale: 2.0,
+    horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+    rotation: Cesium.Math.toRadians(45),
+    color: Cesium.Color.YELLOW
+  }
+});
+// 修改图片位置
+billboard.billboard.pixelOffset = new Cesium.Cartesian2(100, 0);
+// 修改图片大小
+billboard.billboard.scale = 3.0;
+// 修改图片颜色
+billboard.billboard.color = Cesium.Color.RED;
+</script>
+
+

@@ -1,0 +1,77 @@
+<html>
+<head>
+    <title>deck.gl ScatterplotLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^6.0.0/deckgl.min.js"></script>
+
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js"></script>
+
+    <style type="text/css">
+        body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body></body>
+
+<script type="text/javascript">
+
+
+    var deckgl = new DeckGL({
+        mapboxApiAccessToken: 'pk.eyJ1IjoibGlsZWlqb3JkYW4iLCJhIjoiY2luc2Z1a2UxMTEybnUya2pheDdwZjhxOSJ9._ENu7hjywKHQZMcj9S24vA',
+        mapStyle: 'mapbox://styles/mapbox/light-v9',
+        longitude: 116,
+        latitude: 40.76,
+        zoom: 6,
+        maxZoom: 16,
+        //layers: []
+        layers: [
+            new ArcLayer({
+                id: 'scatter-plot',
+                data: 'http://localhost:63342/webgl-1/webgl/test1/17/city.geojson?_ijt=itafuc3qpn3ssuvi8v43n14kco',
+                getSourcePosition: d => d.geometry.coordinates[0],
+                getTargetPosition: d => d.geometry.coordinates[1],
+                getSourceColor: d => [255, 0, 0],
+                getTargetColor: d => [0, 255, 0],
+                strokeWidth:2,
+                fp64: true
+            })
+        ]
+
+    });
+
+    window.onclick = function () {
+
+
+        console.log("...start arc...")
+
+        deckgl.setProps({layers : []})
+
+    }
+
+
+    window.ondblclick = function () {
+
+
+        console.log("...start arc...")
+
+        deckgl.setProps({layers : [new ArcLayer({
+                id: 'scatter-plot',
+                // data: 'http://localhost:63342/webgl-1/webgl/test1/17/city.geojson?_ijt=itafuc3qpn3ssuvi8v43n14kco',
+                getSourcePosition: d => d.geometry.coordinates[0],
+                getTargetPosition: d => d.geometry.coordinates[1],
+                getSourceColor: d => [255, 0, 0],
+                getTargetColor: d => [0, 255, 0],
+                strokeWidth:2,
+                fp64: true
+            })]})
+
+    }
+
+
+
+</script>
+</html>

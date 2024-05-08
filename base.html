@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cesium测试Demo</title>
+    <script src="Build/CesiumUnminified/Cesium.js"></script>
+    <link rel="stylesheet" href="Build/Cesium/Widgets/widgets.css">
+    <style>
+        html,
+        body {
+            padding: 0px;
+            margin: 0px;
+        }
+
+        #cesiumContainer {
+            width: 100%;
+            height: 100%;
+        }
+        .ctcx {
+    border: 1px solid black;
+	background: #09f
+}
+    </style>
+</head>
+
+<body>
+    <div id="cesiumContainer"></div>
+</body>
+
+</html>
+<script>
+    var imageryProvider = new Cesium.UrlTemplateImageryProvider({ url: 'https://t0.tianditu.gov.cn/DataServer?T=img_w&tk=f398daef89049d918105f6d4d412916a&x={x}&y={y}&l={z}' });
+    var viewer = new Cesium.Viewer('cesiumContainer', {
+        animation: false,//是否创建动画小器件，左下角仪表
+        baseLayerPicker: false,//是否显示图层选择器
+        fullscreenButton: false,//是否显示全屏按钮
+        geocoder: false,//是否显示geocoder小器件，右上角查询按钮
+        homeButton: false,//是否显示Home按钮
+        infoBox: false,//是否显示信息框
+        sceneModePicker: false,//是否显示3D/2D选择器
+        scene3DOnly: false,//如果设置为true，则所有几何图形以3D模式绘制以节约GPU资源
+        selectionIndicator: false,//是否显示选取指示器组件
+        timeline: false,//是否显示时间轴
+        navigationHelpButton: false,//是否显示右上角的帮助按钮
+        baselLayerPicker: false,// 将图层选择的控件关掉，才能添加其他影像数据
+        shadows: true,//是否显示背影
+        shouldAnimate: true,
+        imageryProvider,
+    });
+
+    // let canvas = document.createElement("canvas");
+    // canvas.width = 100
+    // canvas.heihgt = 30
+    // let ctx = canvas.getContext("2d");
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // //绘制图片
+    // ctx.drawImage('./images/ccc.png', 0, 0);
+
+    // //绘制文字
+    // ctx.fillStyle = "rgb(255, 255, 255)";
+    // ctx.font = '20px 微软雅黑';
+    // ctx.textBaseline = "middle";
+    // ctx.textAlign="center"; 
+    // ctx.fillText('中国首都北京', canvas.width/2, canvas.height / 2);
+
+    // let newImg = new Image(canvas.width, canvas.height);
+    // newImg.src = canvas.toDataURL("image/png");
+    // setTimeout(() => {
+    //     var entity = viewer.entities.add({
+	// 			name: "绿色自定义图标",
+	// 			position: Cesium.Cartesian3.fromDegrees(116.47, 40.02, 3),
+	// 			billboard: {
+	// 				image: newImg.stc,
+	// 				scale: 1,
+	// 				pixelOffset: new Cesium.Cartesian2(0, -6), //偏移量 
+	// 				horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+	// 				verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+	// 				scaleByDistance: new Cesium.NearFarScalar(2000, 0.6, 12000, 0.2),
+	// 				distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 10000),
+	// 			}
+	// 		});
+    // }, 300)
+
+// 创建二维画布
+var canvas = document.createElement("canvas");
+	canvas.width = 260;
+	canvas.height = 55;
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#06f";
+    ctx.fillRect (0, 0, 260, 55);
+    ctx.fillStyle = "#fff";
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, 260, 55);
+    ctx.lineWidth = 2; 
+	ctx.textAlign = "center"
+	ctx.textBaseline = "middle"
+	ctx.font = "bold 20px sans-serif"
+    ctx.fillText("天若有情：保定机场", 130, 18);
+	ctx.fillText("天若有情：2025-08-05", 130, 42);
+// 将画布转化成图片
+let image = new Image();
+image.src = canvas.toDataURL("image/png")
+// 使用cesium创建实体
+let entity = viewer.entities.add({
+    position: Cesium.Cartesian3.fromDegrees(109.44, 32.11,30.0),
+    point : {
+        pixelSize : 10,
+        color : Cesium.Color.YELLOW,
+        outlineColor : Cesium.Color.RED,
+        outlineWidth : 1
+    },
+    billboard: {
+        image: image,
+        width: 260,
+        height: 55,
+      },
+});
+viewer.flyTo(entity, {
+    offset : {
+        heading : Cesium.Math.toRadians(0.0),
+        pitch : Cesium.Math.toRadians(-25),
+        range : 10000
+    }
+});
+
+
+</script>

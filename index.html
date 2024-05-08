@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>cesium书签</title>
+  <link href="https://whgok.gitee.io/home/css/book.css?v=2" rel="stylesheet" />
+  <script src="https://whgok.gitee.io/home/js/vue.global.js"></script>
+</head>
+
+<body>
+  <div id="app" class="mainBody">
+    <div class="toper"><span style="margin-right:12px">——</span>个人书签<span style="margin-left:12px">——</span></div>
+    <eles t="1.Demo1" :data="data1"></eles>
+    <eles t="2.Demo2" :data="data2"></eles>
+    <eles t="3.Demo3" :data="data3"></eles>
+  </div>
+</body>
+
+<script type="text/x-template" id="eles">
+  <h3 class="itemTit">{{ t }}</h3>
+  <div class="btns">
+    <a class="btn" v-for="it in data.map(item => item.split(','))" :key="it[0]" target="_blank" :href="it[0]">{{ it[1] }}</a>
+  </div>
+</script>
+
+<script>
+  const eles = {
+    template: '#eles',
+    props: {
+      data: Array,
+      t: ""
+    }
+  }
+  const { createApp } = Vue
+  createApp({
+    components: { eles },
+    data() {
+      return {
+        titles: [],
+        data1: [
+          "./cesium.html,cesium",
+          "./cesium1.html,cesium1",
+          "./cesium2.html,cesium2",
+          "./cesium3.html,cesium3",
+          "./cesium4.html,cesium4",
+          "./cesium5.html,cesium5",
+        ],
+        data2: [
+          "./直线箭头采集.html,直线箭头采集",
+          "./钳击箭头采集.html,钳击箭头采集",
+          "./攻击箭头采集_平尾.html,攻击箭头采集（平尾）",
+          "./攻击箭头采集_燕尾.html,攻击箭头采集（燕尾）",
+          "./集结地采集.html,集结地采集",
+        ],
+        data3: [
+          "./直线箭头编辑修改.html,直线箭头采集编辑修改",
+          "./钳击箭头编辑修改.html,钳击箭头采集编辑修改",
+          "./攻击箭头编辑修改_平尾.html,攻击箭头采集编辑修改（平尾）",
+          "./攻击箭头编辑修改_燕尾.html,攻击箭头采集编辑修改（燕尾）",
+          "./集结地编辑修改.html,集结地采集编辑修改",
+        ],
+      }
+    }
+  }).mount('#app')
+</script>
+
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cesium第一课</title>
+    <script src="Build/CesiumUnminified/Cesium.js"></script>
+    <link rel="stylesheet" href="Build/Cesium/Widgets/widgets.css">
+    <style>
+        html,
+        body {
+            padding: 0px;
+            margin: 0px;
+        }
+
+        #cesiumContainer {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cesiumContainer"></div>
+</body>
+
+</html>
+<script>
+    var imageryProvider = new Cesium.UrlTemplateImageryProvider({ url: 'https://t0.tianditu.gov.cn/DataServer?T=img_w&tk=f398daef89049d918105f6d4d412916a&x={x}&y={y}&l={z}' });
+    var viewer = new Cesium.Viewer('cesiumContainer', {
+        animation: false,//是否创建动画小器件，左下角仪表
+        baseLayerPicker: false,//是否显示图层选择器
+        fullscreenButton: false,//是否显示全屏按钮
+        geocoder: false,//是否显示geocoder小器件，右上角查询按钮
+        homeButton: false,//是否显示Home按钮
+        infoBox: false,//是否显示信息框
+        sceneModePicker: false,//是否显示3D/2D选择器
+        scene3DOnly: false,//如果设置为true，则所有几何图形以3D模式绘制以节约GPU资源
+        selectionIndicator: false,//是否显示选取指示器组件
+        timeline: false,//是否显示时间轴
+        navigationHelpButton: false,//是否显示右上角的帮助按钮
+        baselLayerPicker: false,// 将图层选择的控件关掉，才能添加其他影像数据
+        shadows: true,//是否显示背影
+        shouldAnimate: true,
+        imageryProvider,
+    });
+    viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(109, 28.0, 1300000.0),//west, south, east, north
+        orientation: {
+            heading: Cesium.Math.toRadians(20.0), // 方向
+            pitch: Cesium.Math.toRadians(-90.0),// 倾斜角度
+            roll: 0
+        }
+    });
+
+    // 定义道路上的经纬度坐标点
+    var roadPoints = [
+        Cesium.Cartesian3.fromDegrees(100, 20, 0),
+        Cesium.Cartesian3.fromDegrees(100, 25, 0),
+        Cesium.Cartesian3.fromDegrees(105, 25, 0),
+        Cesium.Cartesian3.fromDegrees(109, 28, 0),
+    ];
+
+    viewer.entities.add({
+        name: "Polyline",
+        polyline: {
+            positions: roadPoints,
+            width: 5.0,
+            material: new Cesium.PolylineGlowMaterialProperty({
+                color: Cesium.Color.BLUE
+            }),
+            depthFailMaterial: new Cesium.PolylineGlowMaterialProperty({
+                color: Cesium.Color.RED
+            }),
+            clampToGround: true,
+        }
+    })
+
+    // 创建道路位置属性
+    var roadProperty = new Cesium.SampledPositionProperty();
+    roadPoints.forEach(function (point, index) {
+        roadProperty.addSample(Cesium.JulianDate.fromIso8601('2022-01-01T00:00:0' + index), point);
+    });
+    // 添加更多样本以覆盖整个动画时间范围
+
+    // 创建广告牌
+    var billboard = viewer.entities.add({
+        position: new Cesium.CallbackProperty(function (time) {
+            var position = roadProperty.getValue(time);
+            if (Cesium.defined(position)) {
+                return position;
+            }
+            // 如果无法获取位置，则返回一个默认位置
+            return Cesium.Cartesian3.fromDegrees(109, 28.0, 0);
+        }, false),
+        billboard: {
+            image: 'images/image.png', // 设置广告牌图片
+            width: 50,
+            height: 50
+        }
+    });
+
+    // 创建动画处理程序
+    viewer.scene.postUpdate.addEventListener(function () {
+        console.log("这是一个log");
+        var time = viewer.clock.currentTime;
+        if (Cesium.defined(time)) {
+            // 更新道路位置属性
+            roadProperty.forwardExtrapolationType = Cesium.ExtrapolationType.HOLD; // 设置道路位置超出样本范围时的行为
+            roadProperty.backwardExtrapolationType = Cesium.ExtrapolationType.HOLD;
+            roadProperty.setInterpolationOptions({
+                interpolationDegree: 1, // 设置插值的度数
+                interpolationAlgorithm: Cesium.LinearApproximation // 设置插值算法
+            });
+            console.log(roadProperty.getValue(time));
+            // 更新广告牌的位置
+            billboard.position = roadProperty.getValue(time);
+        }
+    });
+
+</script>
